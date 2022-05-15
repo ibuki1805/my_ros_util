@@ -1,0 +1,8 @@
+hz: 1
+footprint_path_topic: "/footprint_path"
+base_link_path_topic: "/base_link_path"
+save_dir_path: "/home/amsl/csv/trj_test_result"
+output_file_name: "steer_video.csv"
+bag_file_name: "/home/amsl/bagfiles/trj_test0405/steer/01_video-2022-04-05-16-58steering_odom_test.bag"
+
+
