@@ -5,7 +5,7 @@ import rospy
 from nav_msgs.msg import Path
 from tf import transformations
 from geometry_msgs.msg import Vector3
-
+import rosbag
 
 class Path2CSV:
     def __init__(self):
@@ -43,6 +43,10 @@ class Path2CSV:
 
 
         print(self.footprint_path_data.shape)
+
+
+    def read_rosbag(self, bag_file_name):
+        rosbag.
 
 
 if __name__ == "__main__":
