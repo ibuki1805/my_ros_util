@@ -3,7 +3,9 @@
 
 #include<ros/ros.h>
 #include<nav_msgs/Path.h>
-
+#include<fstream>
+#include<sstream>
+#include<my_ros_util/quaternion_euler_converter.h>
 class Path2CSV
 {
 public:
@@ -13,15 +15,16 @@ public:
 
 private:
     void pathCallback(const nav_msgs::Path::ConstPtr& msg);
+    void write_path2csv(const nav_msgs::Path &path, const int &lookup_length);
 
     int hz_;
     std::string path_topic_;
+    std::string csv_file_name_;
     nav_msgs::Path path_;
 
     ros::NodeHandle nh_;
     ros::NodeHandle private_nh_;
     ros::Subscriber sub_path_;
-
 
 };
 

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="footprint_path_file" default="/home/amsl/csv/trj_test_result/steer/footprint_path.csv" />
+    <arg name="footprint_path" default="/footprint_path" />
+    <arg name="footprint_odom_file" default="/home/amsl/csv/trj_test_result/steer/footprint_odom.csv" />
+    <arg name="footprint_odom" default="/steering_odom" />
+    <arg name="raw_odom_file" default="/home/amsl/csv/trj_test_result/steer/raw_odom.csv" />
+    <arg name="raw_odom" default="/raw_odom" />
+
+    <node name="path2csv" pkg="my_ros_util" type="path2csv" output="screen">
+        <param name="csv_file_name_" value="$(arg footprint_path_file)" />
+        <param name="path_topic" value="$(arg footprint_path)" />
+    </node>
+
+    <node name="footprint_odom2csv" pkg="my_ros_util" type="odom2csv" output="screen">
+        <param name="csv_file_name_" value="$(arg footprint_odom_file)" />
+        <param name="path_topic" value="$(arg footprint_odom)" />
+    </node>
+
+    <node name="raw_odom2csv" pkg="my_ros_util" type="odom2csv" output="screen">
+        <param name="csv_file_name_" value="$(arg raw_odom_file)" />
+        <param name="path_topic" value="$(arg raw_odom)" />
+    </node>
+
+    <node name="steering_odom_converter" pkg="steering_path_planner" type="steering_odom_converter" output="screen">
+        <param name="hz" value="100" />
+        <param name="adjust_x" value="-0.35" />
+        <param name="adjust_y" value="1.8" />
+        <param name="adjust_theta" value="-20" />
+    </node>
+</launch>
