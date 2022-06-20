@@ -21,22 +21,24 @@ void Path2CSV::quaternion2euler(geometry_msgs::Quaternion quaternion, double &ro
 
 void Path2CSV::write_path2csv(const nav_msgs::Path &path, const int &lookup_length)
 {
-    std::ofstream ofs(csv_file_name_, std::ios::app);
-    int begin_idx = path.poses.size() - lookup_length -1;
-    int end_idx = path.poses.size() - 1;
+    std::ofstream ofs(csv_file_name_, std::ios::out);
+    // int begin_idx = path.poses.size() - lookup_length -1;
+    // int end_idx = path.poses.size() - 1;
+    ofs << "seq,x,y,z,roll,roll(deg),pitch,pitch(deg),yaw,yaw(deg),time,frame_id\n";
     std::stringstream ss;
-    for(int i = begin_idx; i < end_idx; i++)
+    for(const auto &pose : path.poses)
     {
-        ss << path.header.seq << ",";
-        ss << path.poses[i].pose.position.x << "," << path.poses[i].pose.position.y << "," << path.poses[i].pose.position.z << ",";
+        ss << pose.header.seq << ",";
+        ss << pose.pose.position.x << "," << pose.pose.position.y << "," << pose.pose.position.z << ",";
         double roll, pitch, yaw;
 
-        quaternion2euler(path.poses[i].pose.orientation, roll, pitch, yaw);
+        quaternion2euler(pose.pose.orientation, roll, pitch, yaw);
         ss << roll << "," << roll*180/M_PI << "," << pitch << "," << pitch*180/M_PI << "," << yaw << "," << yaw*180/M_PI << ",";
-        ss << path.header.stamp << "," << path.header.frame_id << ",";
+        ss << ros::Duration(pose.header.stamp -path.poses[0].header.stamp).toSec() << "," << pose.header.frame_id << ",";
         ss << "\n";
     }
     ofs<< ss.str().c_str();
+    ofs.close();
     ROS_INFO("written csv file");
 }
 
@@ -47,7 +49,7 @@ void Path2CSV::pathCallback(const nav_msgs::Path::ConstPtr& msg)
     {
         int increased_size = msg->poses.size() - path_.poses.size();
         path_ = *msg;
-        if(increased_size > 0) write_path2csv(path_, increased_size);
+        write_path2csv(path_, increased_size);
         // ROS_INFO("path is updated with %d points", (int)path_.poses.size());
 
     }
