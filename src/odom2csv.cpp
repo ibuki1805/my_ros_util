@@ -23,12 +23,19 @@ void Odom2CSV::write_odom2csv(const nav_msgs::Odometry::ConstPtr &odom, const na
 {
     std::ofstream ofs(csv_file_name_, std::ios::app);
     std::stringstream ss;
-    ss << odom.header.seq << ",";
-    ss << odom.pose.pose.position.x << "," << odom.pose.pose.position.y << "," << odom.pose.pose.position.z << ",";
+    ss << odom->header.seq << ",";
+    ss << odom->pose.pose.position.x << "," << odom->pose.pose.position.y << "," << odom->pose.pose.position.z << ",";
+
+    double dt = ros::Duration(odom->header.stamp - pre_odom.header.stamp).toSec();
+    double vx = (odom->pose.pose.position.x - pre_odom.pose.pose.position.x) / dt;
+    double vy = (odom->pose.pose.position.y - pre_odom.pose.pose.position.y) / dt;
+    double v = sqrt(vx * vx + vy * vy);
+    ss << vx << "," << vy << "," << v << ",";
+
     double roll, pitch, yaw;
-    quaternion2euler(odom.pose.pose.orientation, roll, pitch, yaw);
+    quaternion2euler(odom->pose.pose.orientation, roll, pitch, yaw);
     ss << roll << "," << roll*180/M_PI << "," << pitch << "," << pitch*180/M_PI << "," << yaw << "," << yaw*180/M_PI << ",";
-    ss << odom.header.stamp << "," << odom.header.frame_id << ",";
+    ss << odom->header.stamp << "," << dt << "," << odom->header.frame_id << ",";
     ss << "\n";
     ofs<< ss.str().c_str();
     ROS_INFO("written csv file");
@@ -46,7 +53,7 @@ void Odom2CSV::odom_callback(const nav_msgs::Odometry::ConstPtr& msg)
 void Odom2CSV::process()
 {
     std::ofstream ofs(csv_file_name_, std::ios::out);
-    ofs << "seq,x,y,z,vx, vy, v, roll,roll(deg),pitch,pitch(deg),yaw,yaw(deg),time,frame_id\n";
+    ofs << "seq,x,y,z,vx, vy, v, roll,roll(deg),pitch,pitch(deg),yaw,yaw(deg),time,dt,frame_id\n";
     ofs.close();
     while(ros::ok())
     {

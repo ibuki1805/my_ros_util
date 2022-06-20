@@ -1,7 +1,5 @@
 #include<my_ros_util/path2csv.h>
 
-using MyROSUtil::QuaternionEulerConverter::quaternion2euler ;
-
 Path2CSV::Path2CSV():private_nh_("~"), nh_("")
 {
     private_nh_.param<std::string>("path_topic", path_topic_, "/path");
@@ -13,6 +11,12 @@ Path2CSV::Path2CSV():private_nh_("~"), nh_("")
 
 Path2CSV::~Path2CSV()
 {
+}
+
+void Path2CSV::quaternion2euler(geometry_msgs::Quaternion quaternion, double &roll, double &pitch, double &yaw)
+{
+    tf2::Quaternion q(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+    tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
 }
 
 void Path2CSV::write_path2csv(const nav_msgs::Path &path, const int &lookup_length)

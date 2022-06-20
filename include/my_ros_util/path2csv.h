@@ -5,7 +5,8 @@
 #include<nav_msgs/Path.h>
 #include<fstream>
 #include<sstream>
-#include<my_ros_util/quaternion_euler_converter.h>
+#include<tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include<geometry_msgs/TransformStamped.h>
 class Path2CSV
 {
 public:
@@ -16,6 +17,7 @@ public:
 private:
     void pathCallback(const nav_msgs::Path::ConstPtr& msg);
     void write_path2csv(const nav_msgs::Path &path, const int &lookup_length);
+    void quaternion2euler(geometry_msgs::Quaternion quaternion, double &roll, double &pitch, double &yaw);
 
     int hz_;
     std::string path_topic_;
