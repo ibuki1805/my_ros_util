@@ -141,6 +141,7 @@ include
 # add_executable(${PROJECT_NAME}_node src/my_ros_util_node.cpp)
 add_executable(path2csv src/path2csv.cpp src/path2csv_node.cpp )
 add_executable(odom2csv src/odom2csv.cpp src/odom2csv_node.cpp )
+add_executable(grid_tester src/grid_tester.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -153,11 +154,13 @@ add_executable(odom2csv src/odom2csv.cpp src/odom2csv_node.cpp )
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(path2csv ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(odom2csv ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(grid_tester ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
 target_link_libraries(path2csv ${catkin_LIBRARIES})
 target_link_libraries(odom2csv ${catkin_LIBRARIES})
+target_link_libraries(grid_tester ${catkin_LIBRARIES})
 
 #############
 ## Install ##

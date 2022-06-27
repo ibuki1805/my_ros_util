@@ -34,7 +34,8 @@ void Path2CSV::write_path2csv(const nav_msgs::Path &path, const int &lookup_leng
 
         quaternion2euler(pose.pose.orientation, roll, pitch, yaw);
         ss << roll << "," << roll*180/M_PI << "," << pitch << "," << pitch*180/M_PI << "," << yaw << "," << yaw*180/M_PI << ",";
-        ss << ros::Duration(pose.header.stamp -path.poses[0].header.stamp).toSec() << "," << pose.header.frame_id << ",";
+        double time = ros::Duration(pose.header.stamp - path.poses[0].header.stamp).toSec();
+        ss << time << "," << pose.header.frame_id << ",";
         ss << "\n";
     }
     ofs<< ss.str().c_str();
