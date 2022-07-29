@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="rosbag_file" default="/home/amsl/bagfiles/brushee/ekf/ekf_test2_v1.0_2022-07-28-20-18-01.bag"/>
+    <arg name="csv_path" default="/home/amsl/csv/brushee/ekf_test2_v1"/>
+    <arg name="csv_tf_file" default="tf_data.csv"/>
+    <arg name="tf_topic" default="/tf"/>
+    <arg name="lookup_frame_id" default="vicon/brushee/brushee"/>
+    <arg name="csv_imu_file" default="imu_data.csv"/>
+    <arg name="imu_topic" default="/imu/data"/>
+    <arg name="csv_odom_file" default="odom_data.csv"/>
+    <arg name="odom_topic" default="/odom"/>
+    <arg name="csv_poseWCS_file" default="poseWCS_data.csv"/>
+    <arg name="poseWCS_topic" default="/ekf_pose"/>
+
+    <node name="rosbag2csv" pkg="my_ros_util" type="rosbag2csv" output="screen" >
+        <param name="bag_file_name" value="$(arg rosbag_file)"/>
+        <param name="tf2csv_file_name" value="$(arg csv_path)/$(arg csv_tf_file)"/>
+        <param name="tf_topic" value="$(arg tf_topic)"/>
+        <param name="lookup_frame_id" value="$(arg lookup_frame_id)"/>
+        <param name="imu2csv_file_name" value="$(arg csv_path)/$(arg csv_imu_file)"/>
+        <param name="imu_topic" value="$(arg imu_topic)"/>
+        <param name="odom2csv_file_name" value="$(arg csv_path)/$(arg csv_odom_file)"/>
+        <param name="odom_topic" value="$(arg odom_topic)"/>
+        <param name="poseWCS2csv_file_name" value="$(arg csv_path)/$(arg csv_poseWCS_file)"/>
+        <param name="poseWCS_topic" value="$(arg poseWCS_topic)"/>
+    </node>
+</launch>
