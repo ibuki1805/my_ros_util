@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="rosbag_file" default="/home/ibuki/bagfiles/"/>
+    <arg name="csv_path" default="/mnt/c/Users/baske/Desktop/csv/brushee"/>
+    <arg name="csv_tf_file" default="tf_data.csv"/>
+    <arg name="lookup_frame_id" default="vicon/brushee/brushee"/>
+    <arg name="csv_imu_file" default="imu_data.csv"/>
+    <arg name="imu_topic" default="imu/data"/>
+    <arg name="csv_odom_file" default="odom_data.csv"/>
+    <arg name="odom_topic" default="/odom"/>
+
+    <node name="rosbag2csv" pkg="my_ros_util" type="rosbag2csv" output="screen" >
+        <param name="bag_file_name" value="$(arg rosbag_file)"/>
+        <param name="csv_tf_file_name" value="$(arg csv_path)/$(arg csv_tf_file)"/>
+        <param name="lookup_frame_id" value="$(arg lookup_frame_id)"/>
+        <param name="csv_imu_file" value="$(arg csv_path)/$(arg csv_imu_file)"/>
+        <param name="imu_topic" value="$(arg imu_topic)"/>
+        <param name="csv_odom_file" value="$(arg csv_path)/$(arg csv_odom_file)"/>
+        <param name="odom_topic" value="$(arg odom_topic)"/>
+    </node>
+</launch>

@@ -16,7 +16,9 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   tf2
   tf2_ros
+  tf2_msgs
   nav_msgs
+  rosbag
 )
 
 ## System dependencies are found with CMake's conventions
@@ -109,9 +111,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES my_ros_util
-#  CATKIN_DEPENDS ccv_dynamixel_msgs dynamixel_workbench_msgs geometry_msgs roscpp rospy sensor_msgs tf2 tf2_ros
+ INCLUDE_DIRS include
+ LIBRARIES MyROSUtil  #Gridmap RayCaster
+ CATKIN_DEPENDS roscpp nav_msgs sensor_msgs
 #  DEPENDS system_lib
 )
 
@@ -122,7 +124,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -130,6 +132,11 @@ include
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/my_ros_util.cpp
 # )
+# add_library(GridMap src/gridmap_editor.cpp )
+# add_library(RayCaster src/raycaster.cpp )
+add_library(MyROSUtil src/gridmap_editor.cpp
+                      src/raycaster.cpp
+                      src/quaternion_euler_converter.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -142,7 +149,11 @@ include
 add_executable(path2csv src/path2csv.cpp src/path2csv_node.cpp )
 add_executable(odom2csv src/odom2csv.cpp src/odom2csv_node.cpp )
 add_executable(grid_tester src/grid_tester.cpp)
-
+add_executable(tf2csv src/tf2csv.cpp src/tf2csv_node.cpp
+                      src/quaternion_euler_converter.cpp)
+add_executable(rosbag2csv src/rosbag2csv_node.cpp
+                          src/rosbag2csv.cpp
+                          src/quaternion_euler_converter.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -155,12 +166,19 @@ add_executable(grid_tester src/grid_tester.cpp)
 add_dependencies(path2csv ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(odom2csv ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(grid_tester ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(tf2csv ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(rosbag2csv ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
 target_link_libraries(path2csv ${catkin_LIBRARIES})
 target_link_libraries(odom2csv ${catkin_LIBRARIES})
 target_link_libraries(grid_tester ${catkin_LIBRARIES})
+# target_link_libraries(GridMap ${catkin_LIBRARIES})
+# target_link_libraries(RayCaster ${catkin_LIBRARIES})
+target_link_libraries(MyROSUtil ${catkin_LIBRARIES})
+target_link_libraries(tf2csv ${catkin_LIBRARIES})
+target_link_libraries(rosbag2csv ${catkin_LIBRARIES})
 
 #############
 ## Install ##
