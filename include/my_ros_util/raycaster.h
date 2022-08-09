@@ -10,7 +10,7 @@ namespace MyROSUtil
     class RayCaster
     {
         public:
-            RayCaster(nav_msgs::OccupancyGrid &map_settings);
+            RayCaster();
             ~RayCaster();
             bool set_map_settings(nav_msgs::OccupancyGrid &map_settings);
             void set_frame_id(std::string frame_id){this -> map_settings_.header.frame_id = frame_id;}

@@ -7,7 +7,7 @@ namespace MyROSUtil
         if(map.data.size() == 0) ROS_WARN("Gridmap: Data size is 0. only setting map_info");
         else if(map.data.size() != map.info.width*map.info.height)
         {
-            ROS_WARN("Gridmap: Cannot set map. Data size is not equal to width*height");
+            ROS_INFO("Gridmap: Cannot set map. Data size is not equal to width*height");
             return false;
         }
         this->grid_.clear();

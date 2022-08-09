@@ -2,20 +2,28 @@
 
 namespace MyROSUtil
 {
-    RayCaster::RayCaster(nav_msgs::OccupancyGrid &map_settings)
+    RayCaster::RayCaster()
     {
-        delete gridmap_;
-        gridmap_ = new Gridmap;
-        gridmap_ -> set_map(map_settings);
-        map_settings_ = map_settings;
+        gridmap_ = new Gridmap();
     }
 
     RayCaster::~RayCaster(){ delete gridmap_; }
 
+    bool RayCaster::set_map_settings(nav_msgs::OccupancyGrid &map_settings)
+    {
+        bool success = gridmap_ -> set_map(map_settings);
+        if(success)
+        {
+            map_settings_ = map_settings;
+            return success;
+        }
+        else return success;
+    }
+
 
     void RayCaster::raycasting(const sensor_msgs::LaserScan &scan)
     {
-        double angle = scan.angle_min+M_PI/2;
+        double angle = scan.angle_min; //+M_PI/2;
         for(const auto &laser : scan.ranges)
         {
             double r = 0;
