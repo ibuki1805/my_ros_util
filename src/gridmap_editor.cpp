@@ -4,10 +4,10 @@ namespace MyROSUtil
 {
     bool Gridmap::set_map(nav_msgs::OccupancyGrid &map)
     {
-        if(map.data.size() == 0) ROS_WARN("Gridmap: Data size is 0. only setting map_info");
+        if(map.data.size() == 0) ROS_INFO("Gridmap: Data size is 0. only setting map_info");
         else if(map.data.size() != map.info.width*map.info.height)
         {
-            ROS_INFO("Gridmap: Cannot set map. Data size is not equal to width*height");
+            ROS_WARN("Gridmap: Cannot set map. Data size is not equal to width*height");
             return false;
         }
         this->grid_.clear();
@@ -32,19 +32,19 @@ namespace MyROSUtil
         return true;
     }
 
-    int Gridmap::get_grid(double &y, double &x)
+    int Gridmap::get_grid(double y, double x)
     {
         int grid_y, grid_x;
-        if( (y+this->origin_y_) < 0 || (y+this->origin_y_)/this->resolution_ >= this->height_ || (x+this->origin_x_) < 0 || (x+this->origin_x_)/this->resolution_ >= this->width_) return -1; //if x or y is out of range return -1
+        if(!is_in_map(y, x)) return -1; //if x or y is out of range return -1
         grid_y = (int)((y+this->origin_y_)/this->resolution_);
         grid_x = (int)((x+this->origin_x_)/this->resolution_);
         // ROS_WARN_STREAM(grid_y<<","<<grid_x);
         return this->grid_[grid_y][grid_x];
     }
 
-    int Gridmap::get_grid(int &y, int &x)
+    int Gridmap::get_grid(int y, int x)
     {
-        if(y < 0 || y >= this->height_ || x < 0 || x >= this->width_) return -1; //if x or y is out of range return -1
+        if(!is_in_map(y, x)) return -1; //if x or y is out of range return -1
         return this->grid_[y][x];
     }
 
@@ -71,10 +71,16 @@ namespace MyROSUtil
         return map;
     }
 
-    bool Gridmap::set_grid(double &y, double &x, const int &value)
+    bool Gridmap::is_in_map(double y, double x)
+    {
+        if( (y+this->origin_y_) < 0 || (y+this->origin_y_)/this->resolution_ >= this->height_ || (x+this->origin_x_) < 0 || (x+this->origin_x_)/this->resolution_ >= this->width_) return false;
+        return true;
+    }
+
+    bool Gridmap::set_grid(double y, double x, const int value)
     {
         int grid_y, grid_x;
-        if( (y+this->origin_y_) < 0 || (y+this->origin_y_)/this->resolution_ >= this->height_ || (x+this->origin_x_) < 0 || (x+this->origin_x_)/this->resolution_ >= this->width_) return false; //if x or y is out of range return -1
+        if(!is_in_map(y, x)) return false;
         grid_y = (int)((y+this->origin_y_)/this->resolution_);
         grid_x = (int)((x+this->origin_x_)/this->resolution_);
         // ROS_WARN_STREAM(grid_y<<","<<grid_x);
@@ -82,11 +88,23 @@ namespace MyROSUtil
         return true;
     }
 
-    bool Gridmap::set_grid(int &y, int &x, const int &value)
+    bool Gridmap::is_in_map(int y, int x)
     {
-        if(y < 0 || y >= this->height_ || x < 0 || x >= this->width_) return false; //if x or y is out of range return -1
+        if(y < 0 || y >= this->height_ || x < 0 || x >= this->width_) return false;
+        return true;
+    }
+
+    bool Gridmap::set_grid(int y, int x, const int value)
+    {
+        if(!is_in_map(y, x)) return false;
         this->grid_[y][x] = value;
         return true;
+    }
+
+    void Gridmap::clear_map(int value)
+    {
+        this->grid_.clear();
+        this->grid_.resize(this->height_ , std::vector<int>(this->width_, value));
     }
 
 }

@@ -111,7 +111,7 @@ Visualization Manager:
         Color: 204; 51; 204
         Head Length: 0.30000001192092896
         Head Radius: 0.10000000149011612
-        Shaft Length: 1
+        Shaft Length: 0
         Shaft Radius: 0.05000000074505806
         Value: Arrow
       Topic: /roomba/odometry
@@ -183,7 +183,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 57.1801643371582
+      Distance: 41.18264389038086
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -191,9 +191,9 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 4.200685977935791
-        Y: -1.0164350271224976
-        Z: -0.1985401213169098
+        X: 14.079851150512695
+        Y: -9.137361526489258
+        Z: -0.09970632195472717
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false

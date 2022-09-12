@@ -21,14 +21,16 @@ namespace MyROSUtil
             void set_width(int width){this -> map_settings_.info.width = width;}
             void set_height(int height){this -> map_settings_.info.height = height;}
             nav_msgs::OccupancyGrid get_map_settings(){return this -> map_settings_;}
-            nav_msgs::OccupancyGrid get_map_msg(){return this -> map_msg_;}
+            nav_msgs::OccupancyGrid get_map_msg();
+
 
             void raycasting(const sensor_msgs::LaserScan &scan);
+            void odom_update(const double dy, const double dx, const double dtheta);
+            void clear_map();
 
         private:
             Gridmap* gridmap_;
             nav_msgs::OccupancyGrid map_settings_;
-            nav_msgs::OccupancyGrid map_msg_;
             const int OCCUPIED = 100;
             const int FREE = 0;
             const int UNKNOWN = -1;

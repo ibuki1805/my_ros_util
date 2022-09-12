@@ -18,8 +18,8 @@ namespace MyROSUtil
     {
         public:
             bool set_map(nav_msgs::OccupancyGrid &map);
-            int get_grid(double &y, double &x);
-            int get_grid(int &y, int &x);
+            int get_grid(double y, double x);
+            int get_grid(int y, int x);
             double get_resolution(){return this->resolution_;}
             int get_width(){return this->width_;}
             int get_height(){return this->height_;}
@@ -27,8 +27,11 @@ namespace MyROSUtil
             double get_origin_y(){return -1 * this->origin_y_;}
             std::string get_frame_id(){return this->frame_id_;}
             nav_msgs::OccupancyGrid get_grid();
-            bool set_grid(double &y, double &x, const int &value);
-            bool set_grid(int &y, int &x, const int &value);
+            bool is_in_map(double y, double x);
+            bool set_grid(double y, double x, const int value);
+            bool is_in_map(int y, int x);
+            bool set_grid(int y, int x, const int value);
+            void clear_map(int value);
 
 
         private:
