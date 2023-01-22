@@ -154,6 +154,7 @@ add_executable(tf2csv src/tf2csv.cpp src/tf2csv_node.cpp
 add_executable(rosbag2csv src/rosbag2csv_node.cpp
                           src/rosbag2csv.cpp
                           src/quaternion_euler_converter.cpp)
+add_executable(tf_visualizer src/tf_visualizer.cpp src/tf_visualizer_node.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -168,6 +169,7 @@ add_dependencies(odom2csv ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_
 add_dependencies(grid_tester ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(tf2csv ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(rosbag2csv ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(tf_visualizer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
@@ -179,6 +181,7 @@ target_link_libraries(grid_tester ${catkin_LIBRARIES})
 target_link_libraries(MyROSUtil ${catkin_LIBRARIES})
 target_link_libraries(tf2csv ${catkin_LIBRARIES})
 target_link_libraries(rosbag2csv ${catkin_LIBRARIES})
+target_link_libraries(tf_visualizer ${catkin_LIBRARIES})
 
 #############
 ## Install ##

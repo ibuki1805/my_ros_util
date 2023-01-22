@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="bag_file" default="/home/amsl/bagfiles/rwrc22/kakunin_with_mcl.bag"/>
+    <arg name="topics" default="/front_hokuyo/scan /imu/data /tf /tf_static /velodyne_packets /whill/odom"/>
+    <arg name="rviz_config" default="$(find my_ros_util)/config/rwrc22.rviz"/>
+
+    <param name="use_sim_time" value="true"/>
+
+    <node pkg="rosbag" type="play" name="rosbag" args="--bags=$(arg bag_file) --topics=$(arg topics) --pause -k --clock -s 17"  />
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_config)"/>
+    <include file="$(find velodyne_pointcloud)/launch/VLP-32C_points.launch"/>
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pc2scan">
+        <remap from="cloud_in" to="/velodyne_points"/>
+    </node>
+    <include file="$(find simple_localmap_creator)/launch/localmap_creator.launch"/>
+</launch>

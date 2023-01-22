@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <machine name="brushee" address="brushee" env-loader="/home/amsl/catkin_ws/devel/env.sh" />
+    <node machine="brushee" pkg="map_server" type="map_saver" args="-f /home/amsl/hogehoge" name="map_saver" />
+</launch>
