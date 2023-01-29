@@ -5,7 +5,7 @@ from typing import List, cast
 import  math
 import numpy as np
 import os
-import time
+import sys
 
 import rosbag
 from tf.transformations import euler_from_quaternion
@@ -24,12 +24,14 @@ class BagReader:
         with rosbag.Bag(self.bagfile_path) as bag:
             is_first_loop = True
             for topic, msg, t in bag.read_messages(topics=["/ccv_dynamixel_controller/dynamixel_state"]):
-                self.steer_data["time"].append(t.to_sec())
+                if is_first_loop:
+                    offsetTime = t.to_sec()
+                self.steer_data["time"].append(t.to_sec() - offsetTime)
                 for state in msg.dynamixel_state:
                     if state.name == "SteerL":
                         if is_first_loop:
                             offsetL = state.present_position
-                        left_rad = float(state.present_position - offsetL) / 303750 * math.pi
+                        left_rad =  float(state.present_position - offsetL) / 303750 * math.pi
                         left_deg = left_rad * 180 / math.pi
                         self.steer_data["left"].append(left_rad)
                         self.steer_data["left_deg"].append(left_deg)
@@ -42,8 +44,6 @@ class BagReader:
                         self.steer_data["right_deg"].append(right_deg)
                 is_first_loop = False
 
-        print(self.steer_data["left_deg"][0], max(self.steer_data["left_deg"]), min(self.steer_data["left_deg"]))
-        print(self.steer_data["right_deg"][0], max(self.steer_data["right_deg"]), min(self.steer_data["right_deg"]))
         return self.steer_data
 
     def tf2pose(self) -> dict:
@@ -70,6 +70,13 @@ class BagReader:
                         self.pose_data["roll_deg"].append(_roll_deg)
                         self.pose_data["pitch_deg"].append(_pitch_deg)
                         self.pose_data["yaw_deg"].append(_yaw_deg)
+
+        for i in range(len(self.pose_data["x"])):
+            if i == 0:
+                self.pose_data["vx"].append(0.0)
+                self.pose_data["vy"].append(0.0)
+                self.pose_data["v"].append(0.0)
+                self.pose_data["dt"].append(0.0)
         # print(self.pose_data)
         return self.pose_data
 
@@ -98,7 +105,7 @@ class BagReader:
         split_str = file_name.split("_")
         # print(split_str)
         split_split_str = split_str[4].split("-")
-        conditions = {split_str[0]: float(split_str[1][0:2])/10, split_str[1][3:5]: float(split_str[2][0:2])/10, split_str[2][3:5]: float(split_str[3][0:2])/10, "t": split_split_str[0]}
+        conditions = {split_str[0]: float(split_str[1][0:2])/10, split_str[1][3:5]: float(split_str[2][0:2])/10, split_str[2][3:5]: float(split_str[3][0:2])/10, "t": int(split_split_str[0])}
         print(conditions)
         return conditions
 
@@ -120,24 +127,29 @@ class FileNameGetter:
 
 
 class GraphPlotter:
-    def __init__(self, _save_dir: str, _data_x: [], _data_y: [], _conditions: dict) -> None:
+    def __init__(self, _data_x: [], _data_y: [], _label_x: [], _label_y: [], labels: [], _save_dir: str, graph_name) -> None:
         self.data_x = _data_x
         self.data_y = _data_y
-        self.conditions = _conditions
+        self.label_x = _label_x
+        self.label_y = _label_y
+        self.labels = labels
         self.save_dir = _save_dir
+        self.graph_name = graph_name
 
-    def show_graph(self) -> None:
+        print(len(self.data_x))
+
+    def make_trj_graph(self) -> None:
         fig , ax = plt.subplots()
 
-        trj_label = str()
-        for key in self.conditions.keys():
-            trj_label = trj_label + key + "-" + str(self.conditions[key]) + "_"
 
-        ax.plot(self.pose_data["x"], self.pose_data["y"], label="trajectory", linewidth=3)
-        ax.plot(self.target_trajectory["x"], self.target_trajectory["y"], label="target", linewidth=3)
+        for i in range(len(self.data_x)):
+            if i == 0:
+                ax.plot(self.data_x[i], self.data_y[i], label="target", linewidth=3, linestyle="dashed")
+            else :
+                ax.plot(self.data_x[i], self.data_y[i], label=self.labels[i], linewidth=3)
 
-        ax.set_xlabel("x [m]")#x軸のラベル
-        ax.set_ylabel("y [m]")#y軸のラベル
+        ax.set_xlabel(self.label_x)#x軸のラベル
+        ax.set_ylabel(self.label_y)#y軸のラベル
         ax.set_xlim(-1, 7)#x軸の範囲
         ax.set_ylim(-0.75, 0.75)#y軸の範囲
         ax.set_xticks(np.arange(-1, 7.1, 1.0))#x軸の目盛り
@@ -147,45 +159,166 @@ class GraphPlotter:
         ax.grid(which="minor", color="gray", linestyle="--")#補助目盛り線を表示
         ax.legend(loc="best")#凡例を表示
         ax.set_aspect("equal")#アスペクト比を1:1に
-        fig.set_figheight(3)#グラフの縦幅
-        fig.set_figwidth(10)#グラフの横幅
+        fig.set_figheight(6)#グラフの縦幅
+        fig.set_figwidth(15)#グラフの横幅
         fig.tight_layout()#グラフの余白を調整
 
-        graph_title = str()
-        for key in self.conditions.keys():
-            graph_title = graph_title + key + "-" + str(self.conditions[key]) + "_"
-        # graph_title = "/home/amsl/master_thesis/thesis/pictures/trj_test_steer/" + graph_title + ".png"
-        graph_title = self.save_dir + graph_title + ".png"
-        # print(graph_title)
+        # fig.savefig(self.save_dir + self.graph_name, format="png", dpi=300)
 
-        fig.savefig(graph_title, format="png", dpi=300)
-
-        # plt.show()
+        plt.show()
         plt.clf()
         plt.cla()
         plt.close()
 
+
+    def make_steer_rad_graph(self) -> None:
+        fig , ax = plt.subplots()
+
+
+        # print(len(self.data_x))
+        # print(len(self.data_x[0]))
+        # print(len(self.data_y))
+        # print(len(self.data_y[0]))
+        for i in range(len(self.data_y)):
+            ax.plot(self.data_x, self.data_y[i], label=self.labels[i], linewidth=3)
+
+        ax.set_xlabel(self.label_x)#x軸のラベル
+        ax.set_ylabel(self.label_y)#y軸のラベル
+        ax.set_xlim(2.9, 12.1)#x軸の範囲
+        ax.set_ylim(-0.4, 0.4)#y軸の範囲
+        ax.set_xticks(np.arange(3.0, 12.0, 1.0))#x軸の目盛り
+        ax.set_yticks(np.arange(-0.5, 0.5, 0.1))#y軸の目盛り
+        # ax.minorticks_on()#補助目盛りを表示
+        ax.grid(which="major", color="black", linestyle="-")#目盛り線を表示
+        ax.grid(which="minor", color="gray", linestyle="--")#補助目盛り線を表示
+        ax.legend(loc="best")#凡例を表示
+        # ax.set_aspect("equal")#アスペクト比を1:1に
+        fig.set_figheight(6)#グラフの縦幅
+        fig.set_figwidth(15)#グラフの横幅
+        fig.tight_layout()#グラフの余白を調整
+
+        # fig.savefig(self.save_dir + self.graph_name, format="png", dpi=300)
+
+        plt.show()
+        plt.clf()
+        plt.cla()
+        plt.close()
+
+    def make_steer_deg_graph(self) -> None:
+        fig , ax = plt.subplots()
+
+
+        # print(len(self.data_x))
+        # print(len(self.data_x[0]))
+        # print(len(self.data_y))
+        # print(len(self.data_y[0]))
+        for i in range(len(self.data_y)):
+            ax.plot(self.data_x, self.data_y[i], label=self.labels[i], linewidth=3)
+
+        ax.set_xlabel(self.label_x)#x軸のラベル
+        ax.set_ylabel(self.label_y)#y軸のラベル
+        ax.set_xlim(2.9, 12.1)#x軸の範囲
+        ax.set_ylim(-25, 25)#y軸の範囲
+        ax.set_xticks(np.arange(3.0, 12.0, 1.0))#x軸の目盛り
+        ax.set_yticks(np.arange(-25, 25.0, 5.0))#y軸の目盛り
+        # ax.minorticks_on()#補助目盛りを表示
+        ax.grid(which="major", color="black", linestyle="-")#目盛り線を表示
+        ax.grid(which="minor", color="gray", linestyle="--")#補助目盛り線を表示
+        ax.legend(loc="best")#凡例を表示
+        # ax.set_aspect("equal")#アスペクト比を1:1に
+        fig.set_figheight(6)#グラフの縦幅
+        fig.set_figwidth(15)#グラフの横幅
+        fig.tight_layout()#グラフの余白を調整
+
+        # fig.savefig(self.save_dir + self.graph_name, format="png", dpi=300)
+
+        plt.show()
+        plt.clf()
+        plt.cla()
+        plt.close()
+
+def create_label(_conditions: [], keys: []) -> []:
+    labels = []
+    for condition in _conditions:
+        label = str()
+        for key in condition.keys():
+            if key in keys:
+                label = label + key + "-" + str(condition[key]) + "_"
+        labels.append(label[0:-1])
+    return labels
+
+
 if __name__ == "__main__":
-    # _bagfile_dir = "/home/amsl/bagfiles/trj_test0121/steer"
-    _bagfile_dir = "/mnt/c/Users/baske/master_thesis_data/trj_test0120/steer"
+    _bagfile_dir = "/home/amsl/bagfiles/trj_test0121/steer"
+    # _bagfile_dir = "/mnt/c/Users/baske/master_thesis_data/trj_test0120/steer"
     _file_name_getter = FileNameGetter(_bagfile_dir)
     _file_name_list = _file_name_getter.get_file_name()
     # print(_file_name_list)
     print(len(_file_name_list))
-    poses_lists = []
+    data_lists = []
     for _file_name in _file_name_list:
         _bagfile_path = _bagfile_dir + "/" + _file_name
         bag_reader = BagReader(_bagfile_path, _file_name)
         _poses = { "conditions": bag_reader.get_conditions(), "poses": bag_reader.tf2pose(), "steer": bag_reader.dxl2steer_angle()}
-        poses_lists.append(_poses)
-        # bag_reader.run()
-        # time.sleep(0.5)
-    print(len(poses_lists))
-    print(poses_lists[0].keys())
-    print(poses_lists[0]["poses"].keys())
-    print(poses_lists[0]["steer"].keys())
+        data_lists.append(_poses)
 
-    # _bagfile_path = "/home/amsl/bagfiles/trj_test0121/steer/v_12-L1_05-L2_05_1v-2023-01-21-18-42steering_odom_test.bag"
-    # bag_reader = BagReader(_bagfile_path)
-    # bag_reader.run()
+    print("All data imported")
+
+    data_x = []
+    data_y = []
+    conditions = []
+    r_steer_data = []
+    r_deg_steer_data = []
+    l_steer_data = []
+    l_deg_steer_data = []
+    steer_time = []
+
+    #add target trj
+    target_data = BagReader(_bagfile_dir + "/" + _file_name_list[0], _file_name_list[0])
+    target_path = target_data.path2course()
+    data_x.append(target_path["x"])
+    # print(target_path["x"])
+    data_y.append(target_path["y"])
+    # print(target_path["y"])
+    conditions.append(target_data.get_conditions())
+
+    #aad data
+    v = float(sys.argv[1])
+    l1 = float(sys.argv[2])
+    l2 = float(sys.argv[3])
+    t = int(sys.argv[4])
+    for data in data_lists:
+        #search target
+        if data["conditions"]["v"] == v and  data["conditions"]["L1"] == l1 and data["conditions"]["L2"] == l2:
+        # if data["conditions"]["v"] == 1.2 and  data["conditions"]["L1"] == 0.5 and data["conditions"]["t"] == 2:
+            data_x.append(data["poses"]["x"])
+            data_y.append(data["poses"]["y"])
+            conditions.append(data["conditions"])
+            r_steer_data.append(data["steer"]["right"])
+            l_steer_data.append(data["steer"]["left"])
+            r_deg_steer_data.append(data["steer"]["right_deg"])
+            l_deg_steer_data.append(data["steer"]["left_deg"])
+            steer_time.append(data["steer"]["time"])
+
+    labels = create_label(conditions, ["v", "L1", "L2", "t"])
+    # print(labels)
+
+    trj_graph = GraphPlotter(data_x, data_y, "x [m]", "y [m]", labels, "/home/amsl/master_thesis/thesis/pictures/trj_test_steer/","v1.2-steer.png")
+    # trj_graph.make_trj_graph()
+    steer_rad_graph = GraphPlotter(steer_time[0], [r_steer_data[0], l_steer_data[0]], "t [s]", "steer angle [rad]", ["right steer", "left steer"], "/home/amsl/master_thesis/thesis/pictures/trj_test_steer/","v1.2-steer.png")
+    steer_rad_graph.make_steer_rad_graph()
+    steer_rad_graph = GraphPlotter(steer_time[0], [r_deg_steer_data[0], l_deg_steer_data[0]], "t [s]", "steer angle [deg]", ["right steer", "left steer"], "/home/amsl/master_thesis/thesis/pictures/trj_test_steer/","v1.2-steer.png")
+    steer_rad_graph.make_steer_deg_graph()
+
+
+    print(labels)
+    print(len(labels))
+    print(len(data_x))
+    print(len(data_y))
+    print(len(conditions))
+    print(data_lists[1].keys())
+    print(data_lists[1]["conditions"].keys())
+    print(data_lists[1]["poses"].keys())
+    print(data_lists[1]["steer"].keys())
+
 
